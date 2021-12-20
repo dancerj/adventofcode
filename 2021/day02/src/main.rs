@@ -1,5 +1,3 @@
-use std::fs;
-
 fn process1(s: &str) -> (u64, u64) {
     let mut depth = 0;
     let mut horizontal = 0;
@@ -30,7 +28,7 @@ fn process1(s: &str) -> (u64, u64) {
 }
 
 fn part1() {
-    let text = fs::read_to_string("input.txt").unwrap();
+    let text = include_str!("input.txt");
     let (depth, horizontal) = process1(&text);
     println!("{} {} {}", depth, horizontal, depth * horizontal);
 }
@@ -64,7 +62,7 @@ fn process2(s: &str) -> (u64, u64) {
 }
 
 fn part2() {
-    let text = fs::read_to_string("input.txt").unwrap();
+    let text = include_str!("input.txt");
     let (depth, horizontal) = process2(&text);
     println!("{} {} {}", depth, horizontal, depth * horizontal);
 }
@@ -78,15 +76,16 @@ fn main() {
 mod tests {
     use super::*;
 
-    #[test]
-    fn test_part1() -> Result<(), std::io::Error> {
-        let commands = "forward 5
+    const COMMANDS: &str = "forward 5
 down 5
 forward 8
 up 3
 down 8
 forward 2";
-        let (depth, horizontal) = process1(commands);
+
+    #[test]
+    fn test_part1() -> Result<(), std::io::Error> {
+        let (depth, horizontal) = process1(COMMANDS);
         // println!("{:?}", result);
         assert_eq!(depth, 10);
         assert_eq!(horizontal, 15);
@@ -95,13 +94,7 @@ forward 2";
 
     #[test]
     fn test_part2() -> Result<(), std::io::Error> {
-        let commands = "forward 5
-down 5
-forward 8
-up 3
-down 8
-forward 2";
-        let (depth, horizontal) = process2(commands);
+        let (depth, horizontal) = process2(COMMANDS);
         assert_eq!(depth, 60);
         assert_eq!(horizontal, 15);
         Ok(())
