@@ -1,4 +1,3 @@
-use std::fs;
 use std::num::ParseIntError;
 
 fn process1(s: &str) -> Result<(u64, u64), ParseIntError> {
@@ -140,13 +139,13 @@ fn process2(s: &str) -> (u64, u64) {
 }
 
 fn part1() {
-    let text = fs::read_to_string("input.txt").unwrap();
+    let text = include_str!("input.txt");
     let (gamma, epsilon) = process1(&text).unwrap();
     println!("{} {} {}", gamma, epsilon, gamma * epsilon);
 }
 
 fn part2() {
-    let text = fs::read_to_string("input.txt").unwrap();
+    let text = include_str!("input.txt");
     let (oxygen, co2scrubber) = process2(&text);
     println!("{} {} {}", oxygen, co2scrubber, oxygen * co2scrubber);
 }
@@ -160,9 +159,7 @@ fn main() {
 mod tests {
     use super::*;
 
-    #[test]
-    fn test_part1() -> Result<(), std::io::Error> {
-        let commands = "00100
+    const COMMANDS: &str = "00100
 11110
 10110
 10111
@@ -174,7 +171,10 @@ mod tests {
 11001
 00010
 01010";
-        let (gamma, epsilon) = process1(commands).unwrap();
+
+    #[test]
+    fn test_part1() -> Result<(), std::io::Error> {
+        let (gamma, epsilon) = process1(COMMANDS).unwrap();
         println!("{} {}", gamma, epsilon);
         assert_eq!(gamma, 22);
         assert_eq!(epsilon, 9);
@@ -183,19 +183,7 @@ mod tests {
 
     #[test]
     fn test_part2() -> Result<(), std::io::Error> {
-        let commands = "00100
-11110
-10110
-10111
-10101
-01111
-00111
-11100
-10000
-11001
-00010
-01010";
-        let (oxygen, co2scrubber) = process2(commands);
+        let (oxygen, co2scrubber) = process2(COMMANDS);
         println!("{} {}", oxygen, co2scrubber);
         assert_eq!(oxygen, 23);
         assert_eq!(co2scrubber, 10);
