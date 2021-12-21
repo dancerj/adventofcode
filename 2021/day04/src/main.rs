@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 #[derive(Debug)]
 struct Table {
     number: Vec<Vec<u32>>,
@@ -12,21 +14,76 @@ fn parse1(s: &str) -> (Vec<u32>, Vec<Table>) {
     // next line is empty.
     assert_eq!(lines.next().unwrap(), "");
 
-    let mut table: Vec<Table> = vec![Table{number: vec![]}];
+    let mut table: Vec<Table> = vec![Table { number: vec![] }];
     let mut i = 0;
     for line in lines {
         if line == "" {
             i += 1;
-            table.push(Table{number: vec![]});
+            table.push(Table { number: vec![] });
             continue;
         }
-        table[i].number.push(line.split_ascii_whitespace().map(|x| x.parse().unwrap()).collect());
+        table[i].number.push(
+            line.split_ascii_whitespace()
+                .map(|x| x.parse().unwrap())
+                .collect(),
+        );
     }
 
     (items, table)
 }
 
-fn evaluate(_numbers: &[u32], _tables: &[Table])-> bool {
+fn is_bingo(matches: Vec<Vec<bool>>) -> bool {
+    let size = matches.len();
+
+    // TODO use reduce instead of fold.
+
+    // horizontal
+    matches.iter().map(|x| {
+        x.iter().fold(true, |accum, item| accum && *item)
+    }).fold(false, |accum, item| accum || item) ||
+    // vertical
+        (0..size).map(|i| {
+            matches.iter().map(|x| {
+                x[i]
+            }).fold(true, |accum, item| accum && item)
+        }).fold(false, |accum, item| accum || item) ||
+    // diagonal
+        (0..size).map(|i| {
+            matches[i][i]
+        }).fold(true, |accum, item| accum && item) ||
+    // diagonal on the other direction.
+        (0..size).map(|i| {
+            matches[i][size-1-i]
+        }).fold(true, |accum, item| accum && item)
+}
+
+fn score(table: &Table, matches: Vec<Vec<bool>>) -> u32 {
+    (0..table.number.len())
+        .map(|i| {
+            (0..table.number.len())
+                .map(|j| if matches[i][j] { table.number[i][j] } else { 0 })
+                .sum::<u32>()
+        })
+        .sum::<u32>()
+}
+
+fn evaluate(numbers_raw: &[u32], tables: &[Table]) -> bool {
+    let numbers_set: HashSet<u32> = numbers_raw.iter().cloned().collect();
+    // Initialize the matched table
+    let _matched_tables = tables.iter().map(|table| {
+        let matched: Vec<Vec<bool>> = table
+            .number
+            .iter()
+            .map(|x| x.iter().map(|x| numbers_set.contains(x)).collect())
+            .collect();
+        print!("{:?}", matched);
+        // let bingo = is_bingo(matched);
+        // if bingo {
+        //     (bingo, Some(score(table, matched)))
+        // } else {
+        //     (false, None)
+        // }
+    });
     true
 }
 
@@ -61,6 +118,54 @@ mod tests {
  2  0 12  3  7";
 
     #[test]
+    fn test_is_bingo() {
+        assert_eq!(
+            is_bingo(vec![
+                vec![false, false, false],
+                vec![false, true, false],
+                vec![false, false, false]
+            ]),
+            false
+        );
+
+        assert_eq!(
+            is_bingo(vec![
+                vec![true, false, false],
+                vec![false, true, false],
+                vec![false, false, true]
+            ]),
+            true
+        );
+
+        assert_eq!(
+            is_bingo(vec![
+                vec![true, false, true],
+                vec![false, true, false],
+                vec![true, false, false]
+            ]),
+            true
+        );
+
+        assert_eq!(
+            is_bingo(vec![
+                vec![true, false, false],
+                vec![true, true, false],
+                vec![true, false, false]
+            ]),
+            true
+        );
+
+        assert_eq!(
+            is_bingo(vec![
+                vec![true, false, false],
+                vec![true, true, true],
+                vec![false, false, false]
+            ]),
+            true
+        );
+    }
+
+    #[test]
     fn test_part1() -> Result<(), std::io::Error> {
         let (sequence, boards) = parse1(COMMANDS);
         println!("{:?} {:?}", sequence, boards);
@@ -71,6 +176,9 @@ mod tests {
                 19, 3, 26, 1
             ]
         );
+
+        evaluate(&sequence, &boards);
+
         // assert_eq!(gamma, 22);
         // assert_eq!(epsilon, 9);
         Ok(())
