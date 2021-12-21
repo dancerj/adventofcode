@@ -32,7 +32,7 @@ fn parse1(s: &str) -> (Vec<u32>, Vec<Table>) {
     (items, table)
 }
 
-fn is_bingo(matches: Vec<Vec<bool>>) -> bool {
+fn is_bingo(matches: &Vec<Vec<bool>>) -> bool {
     let size = matches.len();
 
     // TODO use reduce instead of fold.
@@ -57,7 +57,7 @@ fn is_bingo(matches: Vec<Vec<bool>>) -> bool {
         }).fold(true, |accum, item| accum && item)
 }
 
-fn score(table: &Table, matches: Vec<Vec<bool>>) -> u32 {
+fn score(table: &Table, matches: &Vec<Vec<bool>>) -> u32 {
     (0..table.number.len())
         .map(|i| {
             (0..table.number.len())
@@ -77,12 +77,12 @@ fn evaluate(numbers_raw: &[u32], tables: &[Table]) -> bool {
             .map(|x| x.iter().map(|x| numbers_set.contains(x)).collect())
             .collect();
         print!("{:?}", matched);
-        // let bingo = is_bingo(matched);
-        // if bingo {
-        //     (bingo, Some(score(table, matched)))
-        // } else {
-        //     (false, None)
-        // }
+        let bingo = is_bingo(&matched);
+        if bingo {
+            (bingo, Some(score(table, &matched)))
+        } else {
+            (false, None)
+        }
     });
     true
 }
@@ -120,7 +120,7 @@ mod tests {
     #[test]
     fn test_is_bingo() {
         assert_eq!(
-            is_bingo(vec![
+            is_bingo(&vec![
                 vec![false, false, false],
                 vec![false, true, false],
                 vec![false, false, false]
@@ -129,7 +129,7 @@ mod tests {
         );
 
         assert_eq!(
-            is_bingo(vec![
+            is_bingo(&vec![
                 vec![true, false, false],
                 vec![false, true, false],
                 vec![false, false, true]
@@ -138,7 +138,7 @@ mod tests {
         );
 
         assert_eq!(
-            is_bingo(vec![
+            is_bingo(&vec![
                 vec![true, false, true],
                 vec![false, true, false],
                 vec![true, false, false]
@@ -147,7 +147,7 @@ mod tests {
         );
 
         assert_eq!(
-            is_bingo(vec![
+            is_bingo(&vec![
                 vec![true, false, false],
                 vec![true, true, false],
                 vec![true, false, false]
@@ -156,7 +156,7 @@ mod tests {
         );
 
         assert_eq!(
-            is_bingo(vec![
+            is_bingo(&vec![
                 vec![true, false, false],
                 vec![true, true, true],
                 vec![false, false, false]
