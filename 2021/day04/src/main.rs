@@ -46,45 +46,71 @@ fn is_bingo(matches: &Vec<Vec<bool>>) -> bool {
             matches.iter().map(|x| {
                 x[i]
             }).fold(true, |accum, item| accum && item)
-        }).fold(false, |accum, item| accum || item) ||
-    // diagonal
-        (0..size).map(|i| {
-            matches[i][i]
-        }).fold(true, |accum, item| accum && item) ||
-    // diagonal on the other direction.
-        (0..size).map(|i| {
-            matches[i][size-1-i]
-        }).fold(true, |accum, item| accum && item)
+        }).fold(false, |accum, item| accum || item)
 }
 
-fn score(table: &Table, matches: &Vec<Vec<bool>>) -> u32 {
-    (0..table.number.len())
-        .map(|i| {
-            (0..table.number.len())
-                .map(|j| if matches[i][j] { table.number[i][j] } else { 0 })
-                .sum::<u32>()
-        })
-        .sum::<u32>()
+fn printmatrix(m: &Vec<Vec<bool>>) {
+    m.iter().for_each(|x| {
+        println!(
+            "{}",
+            x.iter()
+                .map(|&value| if value { 'X' } else { ' ' })
+                .collect::<String>()
+        );
+    });
+    println!("");
 }
 
-fn evaluate(numbers_raw: &[u32], tables: &[Table]) -> bool {
+// Return whether there was a bingo, and returs the score.
+fn evaluate(numbers_raw: &[u32], tables: &[Table]) -> (bool, u32) {
+    let last_number = numbers_raw[numbers_raw.len() - 1];
     let numbers_set: HashSet<u32> = numbers_raw.iter().cloned().collect();
     // Initialize the matched table
-    let _matched_tables = tables.iter().map(|table| {
-        let matched: Vec<Vec<bool>> = table
-            .number
-            .iter()
-            .map(|x| x.iter().map(|x| numbers_set.contains(x)).collect())
-            .collect();
-        print!("{:?}", matched);
-        let bingo = is_bingo(&matched);
-        if bingo {
-            (bingo, Some(score(table, &matched)))
-        } else {
-            (false, None)
-        }
-    });
-    true
+    match tables
+        .iter()
+        .map(|table| {
+            let matched: Vec<Vec<bool>> = table
+                .number
+                .iter()
+                .map(|x| x.iter().map(|x| numbers_set.contains(x)).collect())
+                .collect();
+            // println!("{:?}", matched);
+
+            //debug print
+            table.number.iter().for_each(|x| {
+                x.iter().for_each(|x| {
+                    if !numbers_set.contains(x) {
+                        print!(" {:>2}  ", x)
+                    } else {
+                        print!("[{:>2}] ", x)
+                    }
+                });
+                println!("");
+            });
+
+            printmatrix(&matched);
+
+            if is_bingo(&matched) {
+                let my_score: u32 = table
+                    .number
+                    .iter()
+                    .map(|x| {
+                        x.iter()
+                            .map(|&x| if numbers_set.contains(&x) { 0 } else { x })
+                            .sum::<u32>()
+                    })
+                    .sum();
+                (true, Some(my_score * last_number))
+            } else {
+                (false, None)
+            }
+        })
+        .find(|x| x.0)
+    {
+        Some((true, Some(score))) => (true, score),
+        Some(_) => panic!("Can't be"),
+        None => (false, 0),
+    }
 }
 
 fn part1() {}
@@ -134,7 +160,7 @@ mod tests {
                 vec![false, true, false],
                 vec![false, false, true]
             ]),
-            true
+            false
         );
 
         assert_eq!(
@@ -143,7 +169,7 @@ mod tests {
                 vec![false, true, false],
                 vec![true, false, false]
             ]),
-            true
+            false
         );
 
         assert_eq!(
@@ -177,10 +203,29 @@ mod tests {
             ]
         );
 
-        evaluate(&sequence, &boards);
+        assert_eq!(evaluate(&sequence[0..5], &boards).0, false);
+        assert_eq!(evaluate(&sequence[0..11], &boards).0, false);
+        assert_eq!(&sequence[0..12], [7, 4, 9, 5, 11, 17, 23, 2, 0, 14, 21, 24]);
+        let r = evaluate(&sequence[0..12], &boards);
+        assert_eq!(r.0, true);
+        assert_eq!(r.1, 4512);
 
         // assert_eq!(gamma, 22);
         // assert_eq!(epsilon, 9);
         Ok(())
+    }
+
+    #[test]
+    fn test_part1_real() {
+        let (sequence, boards) = parse1(include_str!("input.txt"));
+        let n = (1..sequence.len())
+            .find(|&length| {
+                let r = evaluate(&sequence[0..length], &boards);
+                r.0
+            })
+            .unwrap();
+        assert_eq!(n, 31);
+        let r = evaluate(&sequence[0..31], &boards);
+        assert_eq!(r.1, 50008);
     }
 }
