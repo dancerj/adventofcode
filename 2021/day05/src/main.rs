@@ -32,6 +32,47 @@ fn parse1(s: &str) -> Vec<Vec<u32>> {
     table
 }
 
+fn parse2(s: &str) -> Vec<Vec<u32>> {
+    let commands: Vec<((usize, usize), (usize, usize))> = s
+        .lines()
+        .map(|s| {
+            let mut s = s.split(' ');
+            match (s.next(), s.next(), s.next()) {
+                (Some(before), Some("->"), Some(after)) => (before, after),
+                _ => panic!("wrong input"),
+            }
+        })
+        .map(|(before, after)| (split_str(before), split_str(after)))
+        .collect();
+
+    let max_value: usize = commands
+        .iter()
+        .map(|&((x1, y1), (x2, y2))| x1.max(x2.max(y1.max(y2))) as usize)
+        .max()
+        .unwrap();
+    let mut table = vec![vec![0; max_value + 1]; max_value + 1];
+
+    commands.iter().for_each(|&((x1, y1), (x2, y2))| {
+        if (x1 == x2) || (y1 == y2) {
+            // only process horizontal, vertical or 45 degrees diagonal lines.
+            if x1 == x2 {
+                (y1.min(y2)..=y1.max(y2)).for_each(|y| {
+                    table[x1][y] += 1;
+                });
+            } else {
+                let offset: i32 = x2 as i32 - x1 as i32;
+                let ydirection = (y2 as i32 - y1 as i32) / offset;
+                // TODO assert direction = -1, 0, or 1.
+                (0..=offset).for_each(|i| {
+                    table[(x1 as i32 + i) as usize][(y1 as i32 + ydirection * offset) as usize] +=
+                        1;
+                });
+            }
+        }
+    });
+    table
+}
+
 fn count_2plus(map: &Vec<Vec<u32>>) -> usize {
     map.iter()
         .map(|x| {
@@ -81,5 +122,13 @@ mod tests {
         // println!(" {:?} {}", map, count);
         // assert_eq!(map, [[1]]);
         assert_eq!(count, 6283);
+    }
+
+    #[test]
+    fn test_part2() {
+        let map = parse2(COMMANDS);
+        let count = count_2plus(&map);
+        map.iter().for_each(|x| println!("{:?}",x));
+        // assert_eq!(count, 5);
     }
 }
