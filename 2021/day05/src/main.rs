@@ -3,9 +3,7 @@ fn split_str(s: &str) -> (usize, usize) {
     (result[0], result[1])
 }
 
-fn parse1(s: &str) -> Vec<Vec<u32>> {
-    const SIZE: usize = 1000;
-    let mut table = vec![vec![0; SIZE]; SIZE];
+fn parse_commands(s: &str) -> Vec<((usize, usize), (usize, usize))> {
     s.lines()
         .map(|s| {
             let mut s = s.split(' ');
@@ -15,36 +13,36 @@ fn parse1(s: &str) -> Vec<Vec<u32>> {
             }
         })
         .map(|(before, after)| (split_str(before), split_str(after)))
-        .for_each(|((x1, y1), (x2, y2))| {
-            if (x1 == x2) || (y1 == y2) {
-                // only process horizontal or vertical lines.
-                if x1 == x2 {
-                    (y1.min(y2)..=y1.max(y2)).for_each(|y| {
-                        table[x1][y] += 1;
-                    });
-                } else {
-                    (x1.min(x2)..=x1.max(x2)).for_each(|x| {
-                        table[x][y1] += 1;
-                    });
-                }
+        .collect()
+}
+
+fn parse1(s: &str) -> Vec<Vec<u32>> {
+    let commands = parse_commands(s);
+    let max_value: usize = commands
+        .iter()
+        .map(|&((x1, y1), (x2, y2))| x1.max(x2.max(y1.max(y2))) as usize)
+        .max()
+        .unwrap();
+    let mut table = vec![vec![0; max_value + 1]; max_value + 1];
+    commands.iter().for_each(|&((x1, y1), (x2, y2))| {
+        if (x1 == x2) || (y1 == y2) {
+            // only process horizontal or vertical lines.
+            if x1 == x2 {
+                (y1.min(y2)..=y1.max(y2)).for_each(|y| {
+                    table[x1][y] += 1;
+                });
+            } else {
+                (x1.min(x2)..=x1.max(x2)).for_each(|x| {
+                    table[x][y1] += 1;
+                });
             }
-        });
+        }
+    });
     table
 }
 
 fn parse2(s: &str) -> Vec<Vec<u32>> {
-    let commands: Vec<((usize, usize), (usize, usize))> = s
-        .lines()
-        .map(|s| {
-            let mut s = s.split(' ');
-            match (s.next(), s.next(), s.next()) {
-                (Some(before), Some("->"), Some(after)) => (before, after),
-                _ => panic!("wrong input"),
-            }
-        })
-        .map(|(before, after)| (split_str(before), split_str(after)))
-        .collect();
-
+    let commands = parse_commands(s);
     let max_value: usize = commands
         .iter()
         .map(|&((x1, y1), (x2, y2))| x1.max(x2.max(y1.max(y2))) as usize)
