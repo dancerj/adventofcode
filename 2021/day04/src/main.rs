@@ -49,19 +49,7 @@ fn is_bingo(matches: &Vec<Vec<bool>>) -> bool {
         }).fold(false, |accum, item| accum || item)
 }
 
-fn printmatrix(m: &Vec<Vec<bool>>) {
-    m.iter().for_each(|x| {
-        println!(
-            "{}",
-            x.iter()
-                .map(|&value| if value { 'X' } else { ' ' })
-                .collect::<String>()
-        );
-    });
-    println!("");
-}
-
-// Return whether there was a bingo, and returs the score.
+// Return whether there was a bingo, and returns the score.
 fn evaluate(numbers_raw: &[u32], tables: &[Table]) -> (bool, u32) {
     let last_number = numbers_raw[numbers_raw.len() - 1];
     let numbers_set: HashSet<u32> = numbers_raw.iter().cloned().collect();
@@ -74,8 +62,6 @@ fn evaluate(numbers_raw: &[u32], tables: &[Table]) -> (bool, u32) {
                 .iter()
                 .map(|x| x.iter().map(|x| numbers_set.contains(x)).collect())
                 .collect();
-            // println!("{:?}", matched);
-
             //debug print
             table.number.iter().for_each(|x| {
                 x.iter().for_each(|x| {
@@ -87,8 +73,6 @@ fn evaluate(numbers_raw: &[u32], tables: &[Table]) -> (bool, u32) {
                 });
                 println!("");
             });
-
-            printmatrix(&matched);
 
             if is_bingo(&matched) {
                 let my_score: u32 = table
@@ -113,11 +97,43 @@ fn evaluate(numbers_raw: &[u32], tables: &[Table]) -> (bool, u32) {
     }
 }
 
-fn part1() {}
+// Returns which board won, with what score.
+fn how_many_bingos(
+    numbers_raw: &[u32],
+    tables: &[Table],
+) -> Vec<(usize /* board number */, u32 /* score */)> {
+    let last_number = numbers_raw[numbers_raw.len() - 1];
+    let numbers_set: HashSet<u32> = numbers_raw.iter().cloned().collect();
+    // Initialize the matched table
+    tables
+        .iter()
+        .enumerate()
+        .filter_map(|(serial_number, table)| {
+            let matched: Vec<Vec<bool>> = table
+                .number
+                .iter()
+                .map(|x| x.iter().map(|x| numbers_set.contains(x)).collect())
+                .collect();
 
-fn main() {
-    part1();
+            if is_bingo(&matched) {
+                let my_score: u32 = table
+                    .number
+                    .iter()
+                    .map(|x| {
+                        x.iter()
+                            .map(|&x| if numbers_set.contains(&x) { 0 } else { x })
+                            .sum::<u32>()
+                    })
+                    .sum();
+                Some((serial_number, my_score * last_number))
+            } else {
+                None
+            }
+        })
+        .collect()
 }
+
+fn main() {}
 
 #[cfg(test)]
 mod tests {
@@ -227,5 +243,43 @@ mod tests {
         assert_eq!(n, 31);
         let r = evaluate(&sequence[0..31], &boards);
         assert_eq!(r.1, 50008);
+    }
+
+    #[test]
+    fn test_part2() {
+        let (sequence, boards) = parse1(COMMANDS);
+
+        assert_eq!(how_many_bingos(&sequence[0..5], &boards).len(), 0);
+        assert_eq!(how_many_bingos(&sequence[0..12], &boards).len(), 1);
+        assert_eq!(how_many_bingos(&sequence[0..15], &boards).len(), 3);
+    }
+
+    #[test]
+    fn test_part2_real() {
+        let (sequence, boards) = parse1(include_str!("input.txt"));
+        assert_eq!(boards.len(), 100);
+        // TODO I could do binary search
+        let n = (1..sequence.len())
+            .find(|&length| {
+                let r = how_many_bingos(&sequence[0..length], &boards);
+                r.len() == 100
+            })
+            .unwrap();
+        assert_eq!(n, 84);
+        let before = how_many_bingos(&sequence[0..83], &boards);
+        let after = how_many_bingos(&sequence[0..84], &boards);
+        let mut bingo_boards = vec![true; 100];
+        before.iter().for_each(|&(board_number, _score)| {
+            bingo_boards[board_number] = false;
+        });
+        let final_score = after.iter().enumerate().find(|&(board_number, _score)| {
+            if bingo_boards[board_number] {
+                println!("board! {}", board_number);
+                true
+            } else {
+                false
+            }
+        });
+        assert_eq!(final_score.unwrap().1 .1, 17408);
     }
 }
