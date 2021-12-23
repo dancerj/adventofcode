@@ -15,8 +15,8 @@ fn parse1(s: &str) {
             }
         })
         .map(|(before, after)| (split_str(before), split_str(after)))
-        .for_each(|((x1,y1),(x2,y2))|{
-            if (x1 == x2) || (y1 ==y2) {
+        .for_each(|((x1, y1), (x2, y2))| {
+            if (x1 == x2) || (y1 == y2) {
                 // only process horizontal or vertical lines.
             }
         })
