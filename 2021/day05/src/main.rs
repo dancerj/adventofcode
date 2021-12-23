@@ -1,11 +1,11 @@
-fn split_str(s: &str) -> (u32, u32) {
-    let result: Vec<u32> = s.split(",").map(|x| x.parse().unwrap()).collect();
+fn split_str(s: &str) -> (usize, usize) {
+    let result: Vec<usize> = s.split(",").map(|x| x.parse().unwrap()).collect();
     (result[0], result[1])
 }
 
-fn parse1(s: &str) {
+fn parse1(s: &str) -> Vec<Vec<u32>> {
     const SIZE: usize = 100;
-    let table = vec![vec![0; SIZE]; SIZE];
+    let mut table = vec![vec![0; SIZE]; SIZE];
     s.lines()
         .map(|s| {
             let mut s = s.split(' ');
@@ -18,8 +18,28 @@ fn parse1(s: &str) {
         .for_each(|((x1, y1), (x2, y2))| {
             if (x1 == x2) || (y1 == y2) {
                 // only process horizontal or vertical lines.
+                if x1 == x2 {
+                    (y1.min(y2)..=y1.max(y2)).for_each(|y| {
+                        table[x1][y] += 1;
+                    });
+                } else {
+                    (x1.min(x2)..=x1.max(x2)).for_each(|x| {
+                        table[x][y1] += 1;
+                    });
+                }
             }
+        });
+    table
+}
+
+fn count_2plus(map: &Vec<Vec<u32>>) -> usize {
+    map.iter()
+        .map(|x| {
+            x.iter()
+                .filter_map(|&x| if x >= 2 { Some(1) } else { None })
+                .sum::<usize>()
         })
+        .sum::<usize>()
 }
 
 fn main() {}
@@ -48,6 +68,9 @@ mod tests {
     #[test]
     fn test_part1() {
         let map = parse1(COMMANDS);
-        println!(" {:?}", map);
+        let count = count_2plus(&map);
+        println!(" {:?} {}", map, count);
+        // assert_eq!(map, [[1]]);
+        assert_eq!(count, 5);
     }
 }
