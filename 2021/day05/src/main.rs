@@ -4,7 +4,7 @@ fn split_str(s: &str) -> (usize, usize) {
 }
 
 fn parse1(s: &str) -> Vec<Vec<u32>> {
-    const SIZE: usize = 100;
+    const SIZE: usize = 1000;
     let mut table = vec![vec![0; SIZE]; SIZE];
     s.lines()
         .map(|s| {
@@ -69,8 +69,17 @@ mod tests {
     fn test_part1() {
         let map = parse1(COMMANDS);
         let count = count_2plus(&map);
-        println!(" {:?} {}", map, count);
+        // println!(" {:?} {}", map, count);
         // assert_eq!(map, [[1]]);
         assert_eq!(count, 5);
+    }
+
+    #[test]
+    fn test_part1_real() {
+        let map = parse1(include_str!("input.txt"));
+        let count = count_2plus(&map);
+        // println!(" {:?} {}", map, count);
+        // assert_eq!(map, [[1]]);
+        assert_eq!(count, 6283);
     }
 }
