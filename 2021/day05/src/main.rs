@@ -53,21 +53,29 @@ fn parse2(s: &str) -> Vec<Vec<u32>> {
     let mut table = vec![vec![0; max_value + 1]; max_value + 1];
 
     commands.iter().for_each(|&((x1, y1), (x2, y2))| {
-        if (x1 == x2) || (y1 == y2) {
-            // only process horizontal, vertical or 45 degrees diagonal lines.
-            if x1 == x2 {
-                (y1.min(y2)..=y1.max(y2)).for_each(|y| {
-                    table[x1][y] += 1;
-                });
+        // only process horizontal, vertical or 45 degrees diagonal lines.
+        if x1 == x2 {
+            (y1.min(y2)..=y1.max(y2)).for_each(|y| {
+                table[x1][y] += 1;
+            });
+        } else {
+            // Swap around to make things go right.
+            let (x1, y1, x2, y2) = if x1 > x2 {
+                (x2, y2, x1, y1)
             } else {
-                let offset: i32 = x2 as i32 - x1 as i32;
-                let ydirection = (y2 as i32 - y1 as i32) / offset;
-                // TODO assert direction = -1, 0, or 1.
-                (0..=offset).for_each(|i| {
-                    table[(x1 as i32 + i) as usize][(y1 as i32 + ydirection * offset) as usize] +=
-                        1;
-                });
-            }
+                (x1, y1, x2, y2)
+            };
+
+            println!("  {},{} - {},{}", x1, y1, x2, y2);
+            let offset: i32 = x2 as i32 - x1 as i32;
+            let ydirection = (y2 as i32 - y1 as i32) / offset;
+            // TODO assert direction = -1, 0, or 1.
+            (0..=offset).for_each(|i| {
+                let x = (x1 as i32 + i) as usize;
+                let y = (y1 as i32 + ydirection * i) as usize;
+                // println!("  {},{}", x, y);
+                table[x][y] += 1;
+            });
         }
     });
     table
@@ -128,7 +136,14 @@ mod tests {
     fn test_part2() {
         let map = parse2(COMMANDS);
         let count = count_2plus(&map);
-        map.iter().for_each(|x| println!("{:?}",x));
-        // assert_eq!(count, 5);
+        map.iter().for_each(|x| println!("{:?}", x));
+        assert_eq!(count, 12);
+    }
+
+    #[test]
+    fn test_part2_real() {
+        let map = parse2(include_str!("input.txt"));
+        let count = count_2plus(&map);
+        assert_eq!(count, 18864);
     }
 }
