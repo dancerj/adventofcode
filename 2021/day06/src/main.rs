@@ -48,7 +48,8 @@ fn less_allocation_iterate(days: u16, input: &Vec<u8>) -> Vec<u8> {
 }
 
 fn main() {
-    let input = vec![3, 4, 3, 1, 2];
+    // let input = vec![3, 4, 3, 1, 2];
+    let input = parse_str::<u8>(include_str!("input.txt"));
     println!("{}", less_allocation_iterate(256, &input).len());
 }
 
