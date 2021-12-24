@@ -47,6 +47,33 @@ fn less_allocation_iterate(days: u16, input: &Vec<u8>) -> Vec<u8> {
     current
 }
 
+/* Returns a day -> count map.*/
+fn convert_to_count(input: &Vec<u8>) -> Vec<u64> {
+    let mut result = vec![0; 9];
+    input.iter().for_each(|&x| {
+        result[x as usize] += 1;
+    });
+    result
+}
+
+fn iterate_counts(days: u16, input: &Vec<u64>) -> u64 {
+    let mut current: Vec<u64> = input.to_vec();
+    (0..days).for_each(|day| {
+        let mut new = vec![0, 0, 0, 0, 0, 0, current[0], 0, current[0]];
+        // println!("1  {:?} ", new);
+
+        (1..=8).for_each(|n| {
+            new[n - 1] += current[n];
+        });
+
+        // println!("2  {:?} ", new);
+        current = new;
+        println!("{} {}", day, current.iter().sum::<u64>());
+        // println!("3  {:?}", current);
+    });
+    current.iter().sum::<u64>()
+}
+
 fn main() {
     // let input = vec![3, 4, 3, 1, 2];
     let input = parse_str::<u8>(include_str!("input.txt"));
@@ -84,5 +111,29 @@ mod tests {
         assert_eq!(less_allocation_iterate(18, &input).len(), 26);
         // assert_eq!(less_allocation_iterate(80, &input).len(), 5934);
         // assert_eq!(less_allocation_iterate(256, &input).len(), 5934);
+    }
+
+    #[test]
+    fn test_convert_to_count() {
+        assert_eq!(convert_to_count(&vec![8]), [0, 0, 0, 0, 0, 0, 0, 0, 1]);
+
+        let input = parse_str::<u8>(COMMANDS);
+        assert_eq!(convert_to_count(&input), [0, 1, 1, 2, 1, 0, 0, 0, 0]);
+    }
+
+    #[test]
+    fn test_count() {
+        let input = parse_str::<u8>(COMMANDS);
+        let count = convert_to_count(&input);
+        assert_eq!(count.len(), 9);
+        assert_eq!(iterate_counts(18, &count), 26);
+        assert_eq!(iterate_counts(256, &count), 26984457539);
+    }
+
+    #[test]
+    fn test_count_real() {
+        let input = parse_str::<u8>(include_str!("input.txt"));
+        let count = convert_to_count(&input);
+        assert_eq!(iterate_counts(256, &count), 1600306001288);
     }
 }
