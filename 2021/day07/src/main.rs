@@ -14,13 +14,31 @@ fn get_fuel(positions: &[i32], goal: i32) -> i32 {
     positions.iter().map(|x| (x - goal).abs()).sum()
 }
 
-fn search_min(positions: &[i32]) -> (i32,i32) {
+fn get_fuel2(positions: &[i32], goal: i32) -> i32 {
+    positions.iter().map(|x| (1..=(x - goal).abs()).sum::<i32>()).sum()
+}
+
+fn search_min(positions: &[i32]) -> (i32, i32) {
     let mut position = positions.iter().sum::<i32>() / positions.len() as i32;
     loop {
         let last = get_fuel(positions, position);
         if get_fuel(positions, position - 1) < last {
             position -= 1;
         } else if get_fuel(positions, position + 1) < last {
+            position += 1;
+        } else {
+            return (position, last);
+        }
+    }
+}
+
+fn search_min2(positions: &[i32]) -> (i32, i32) {
+    let mut position = positions.iter().sum::<i32>() / positions.len() as i32;
+    loop {
+        let last = get_fuel2(positions, position);
+        if get_fuel2(positions, position - 1) < last {
+            position -= 1;
+        } else if get_fuel2(positions, position + 1) < last {
             position += 1;
         } else {
             return (position, last);
@@ -54,11 +72,22 @@ mod tests {
         assert_eq!(search_min(&commands).0, 2);
     }
 
-
     #[test]
     fn test_search_min_real() {
         let commands = parse_str::<i32>(include_str!("input.txt"));
         assert_eq!(search_min(&commands).0, 313);
-        assert_eq!(search_min(&commands).1, 313);
+        assert_eq!(search_min(&commands).1, 335271);
+    }
+
+    #[test]
+    fn test_search_min2() {
+        let commands = parse_str::<i32>(COMMANDS);
+        assert_eq!(search_min2(&commands), (5,168));
+    }
+
+    #[test]
+    fn test_search_min2_real() {
+        let commands = parse_str::<i32>(include_str!("input.txt"));
+        assert_eq!(search_min2(&commands), (461, 95851339));
     }
 }
