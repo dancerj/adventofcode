@@ -77,7 +77,7 @@ fn iterate_counts(days: u16, input: &Vec<u64>) -> u64 {
 fn main() {
     // let input = vec![3, 4, 3, 1, 2];
     let input = parse_str::<u8>(include_str!("input.txt"));
-    println!("{}", less_allocation_iterate(256, &input).len());
+    println!("{}", less_allocation_iterate(100, &input).len());
 }
 
 #[cfg(test)]
