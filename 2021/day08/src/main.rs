@@ -24,7 +24,7 @@ fn parse(s: &str) -> Vec<SignalPatterns> {
 }
 
 fn count_nums1478(input: &Vec<SignalPatterns>) -> HashMap<i32, u32> {
-    let mut count: HashMap<i32,u32> = HashMap::new();
+    let mut count: HashMap<i32, u32> = HashMap::new();
     input
         .iter()
         .map(|signal_patterns| {
@@ -42,13 +42,12 @@ fn count_nums1478(input: &Vec<SignalPatterns>) -> HashMap<i32, u32> {
         .flatten()
         .for_each(|value| {
             let x = count.entry(value).or_insert(0);
-                *x += 1;
-
+            *x += 1;
         });
     count
 }
 
-fn count_sum1478(input: &Vec<SignalPatterns>) -> usize{
+fn count_sum1478(input: &Vec<SignalPatterns>) -> usize {
     input
         .iter()
         .map(|signal_patterns| {
@@ -65,6 +64,39 @@ fn count_sum1478(input: &Vec<SignalPatterns>) -> usize{
         })
         .flatten()
         .count()
+}
+
+fn char_to_value(c: char) -> u8 {
+    c as u8 - b'a'
+}
+
+fn reduce_possibility(input: SignalPatterns) {
+    // fake alphabet -> real alphabet possibility map.
+    let possibility: Vec<Vec<bool>> = vec![vec![true; 10]; 10];
+    input.digits.iter().for_each(|digit| {
+        match digit.len() {
+            2 => {
+                // the two alphabets mean 1, cf
+            },
+            3 => {
+                // the 3 mean 7, acf
+            },
+            4 => {
+                // the 4 mean 4, bcdf(-abe)
+            },
+            5 => {
+                // the 5 mean 2,3,5 acdeg(-bf) acdfg(-be) abdfg(-ce)
+                // adg == true, others not sure
+            },
+            6 => {
+                // the 6 mean 0,6,9 abcefg(-d) abdefg(-c) abcdfg(-e)
+            },
+            7 => {
+                // the 7 mean 8, no hint
+            },
+            _ => {}
+        }
+    })
 }
 
 fn main() {}
@@ -95,10 +127,22 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
         (0..10).for_each(|x| {
             println!("{} {}", x, SEGMENTS[x].len());
         });
+        // 0 6
+        // 1 2
+        // 2 5
+        // 3 5
+        // 4 4
+        // 5 5
+        // 6 6
+        // 7 3
+        // 8 7
+        // 9 6
+
         assert_eq!(SEGMENTS[1].len(), 2);
         assert_eq!(SEGMENTS[4].len(), 4);
         assert_eq!(SEGMENTS[7].len(), 3);
         assert_eq!(SEGMENTS[8].len(), 7);
+        panic!();
     }
 
     #[test]
@@ -116,5 +160,4 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
         let c = count_sum1478(&parse(include_str!("input.txt")));
         assert_eq!(c, 548);
     }
-
 }
