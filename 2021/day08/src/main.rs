@@ -23,7 +23,7 @@ fn parse(s: &str) -> Vec<SignalPatterns> {
         .collect()
 }
 
-fn count_nums1478(input: Vec<SignalPatterns>) -> HashMap<i32, u32> {
+fn count_nums1478(input: &Vec<SignalPatterns>) -> HashMap<i32, u32> {
     let mut count: HashMap<i32,u32> = HashMap::new();
     input
         .iter()
@@ -48,7 +48,7 @@ fn count_nums1478(input: Vec<SignalPatterns>) -> HashMap<i32, u32> {
     count
 }
 
-fn count_sum1478(input: Vec<SignalPatterns>) -> usize{
+fn count_sum1478(input: &Vec<SignalPatterns>) -> usize{
     input
         .iter()
         .map(|signal_patterns| {
@@ -103,17 +103,17 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
 
     #[test]
     fn test_count_nums1478() {
-        let c = count_nums1478(parse(COMMANDS));
+        let c = count_nums1478(&parse(COMMANDS));
         println!("{:?}", c);
         assert_eq!(*c.get(&1).unwrap(), 8);
         assert_eq!(c[&1], 8);
-        let c = count_sum1478(parse(COMMANDS));
+        let c = count_sum1478(&parse(COMMANDS));
         assert_eq!(c, 26);
     }
 
     #[test]
     fn test_count_nums1478_real() {
-        let c = count_sum1478(parse(include_str!("input.txt")));
+        let c = count_sum1478(&parse(include_str!("input.txt")));
         assert_eq!(c, 548);
     }
 
