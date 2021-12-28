@@ -75,7 +75,11 @@ fn set_of_alpha(s: &str) -> BTreeSet<u8> {
     s.as_bytes().iter().map(|&c| char_to_value(c)).collect()
 }
 
-fn reduce_possibility(input: &SignalPatterns) {
+fn to_set(input: &[u8]) -> BTreeSet<u8> {
+    input.iter().cloned().collect()
+}
+
+fn compute_match(input: &SignalPatterns) {
     // fake alphabet -> real alphabet possibility map.
     let possibility: Vec<Vec<bool>> = vec![vec![true; 10]; 10];
 
@@ -110,7 +114,7 @@ fn reduce_possibility(input: &SignalPatterns) {
 
     // ecdaf_b -- (7) remaining g
 
-    panic!();
+    // (1)
     let a: Vec<u8> = by_len
         .get(&3)
         .unwrap()
@@ -123,30 +127,119 @@ fn reduce_possibility(input: &SignalPatterns) {
     assert_eq!(a.len(), 1);
     let a = a[0];
 
-    input.digits.iter().for_each(|digit| {
-        match digit.len() {
-            2 => {
-                // the two alphabets can only mean 1, cf
+    const INVALID_VALUE: u8 = 10;
+
+    // (2)
+    // one of the 6's negative case is 'c' that is shared with (2)cf.
+    let cf = by_len.get(&2).unwrap().get(0).unwrap();
+    let mut c = INVALID_VALUE;
+    cf.iter().for_each(|&cf_candidate| {
+        by_len.get(&6).unwrap().iter().for_each(|x| {
+            if !x.contains(&cf_candidate) {
+                c = cf_candidate;
             }
-            3 => {
-                // the 3 mean 7, acf
-            }
-            4 => {
-                // the 4 mean 4, bcdf(-abe)
-            }
-            5 => {
-                // the 5 mean 2,3,5 acdeg(-bf) acdfg(-be) abdfg(-ce)
-                // adg == true, others not sure
-            }
-            6 => {
-                // the 6 mean 0,6,9 abcefg(-d) abdefg(-c) abcdfg(-e)
-            }
-            7 => {
-                // the 7 mean 8, no hint
-            }
-            _ => {}
+        })
+    });
+    assert_ne!(c, INVALID_VALUE);
+    let mut f = INVALID_VALUE;
+    cf.iter().for_each(|&cf_candidate| {
+        if cf_candidate != c {
+            f = cf_candidate;
         }
-    })
+    });
+    assert_ne!(f, INVALID_VALUE);
+    let the_7 = by_len.get(&7).unwrap().get(0).unwrap();
+
+    // (3)
+    let mut e = INVALID_VALUE;
+    by_len.get(&5).unwrap().iter().for_each(|value| {
+        if !value.contains(&c) {
+            println!("{:?}", value);
+            // This node is -ce
+            the_7.difference(value).for_each(|&e_candidate| {
+                if e_candidate != c {
+                    e = e_candidate;
+                }
+            });
+        }
+    });
+    assert_ne!(e, INVALID_VALUE);
+
+    // (4)
+    let mut b = INVALID_VALUE;
+    by_len.get(&5).unwrap().iter().for_each(|value| {
+        if !value.contains(&e) && value.contains(&c) {
+            // This node is -be.
+            the_7.difference(value).for_each(|&b_candidate| {
+                if b_candidate != e {
+                    b = b_candidate;
+                }
+            });
+        }
+    });
+    assert_ne!(b, INVALID_VALUE);
+
+    // (5) -- f is already there.
+
+    // (6)
+    let mut d = INVALID_VALUE;
+    by_len
+        .get(&4)
+        .unwrap()
+        .get(0)
+        .unwrap()
+        .iter()
+        .for_each(|&d_candidate| {
+            if d_candidate != b && d_candidate != c && d_candidate != f {
+                d = d_candidate;
+            }
+        });
+    assert_ne!(d, INVALID_VALUE);
+
+    let g = *the_7
+        .difference(&[a, b, c, d, e, f].iter().cloned().collect::<BTreeSet<u8>>())
+        .next()
+        .unwrap();
+
+    // input.digits.iter().for_each(|digit| {
+    //     match digit.len() {
+    //         2 => {
+    //             // the two alphabets can only mean 1, cf
+    //         }
+    //         3 => {
+    //             // the 3 mean 7, acf
+    //         }
+    //         4 => {
+    //             // the 4 mean 4, bcdf(-abe)
+    //         }
+    //         5 => {
+    //             // the 5 mean 2,3,5 acdeg(-bf) acdfg(-be) abdfg(-ce)
+    //             // adg == true, others not sure
+    //         }
+    //         6 => {
+    //             // the 6 mean 0,6,9 abcefg(-d) abdefg(-c) abcdfg(-e)
+    //         }
+    //         7 => {
+    //             // the 7 mean 8, no hint
+    //         }
+    //         _ => {}
+    //     }
+    // })
+    println!("{:?}", [a,b,c,d,e,f,g]);
+    let lookup : Vec<BTreeSet<u8>> = vec![
+        to_set(&[a,b,c,e,f,g]),
+        to_set(&[c,f]),
+        to_set(&[a,c,d,e,g]),
+        to_set(&[a,c,d,f,g]),
+        to_set(&[b,c,d,f]),
+        to_set(&[a,b,d,f,g]),
+        to_set(&[a,b,d,e,f,g]),
+        to_set(&[a,c,f]),
+        to_set(&[a,b,c,d,e,f,g]),
+        to_set(&[a,b,c,d,f,g]),
+    ];
+    println!("{:?}", lookup);
+    //todo
 }
 
 fn main() {}
@@ -224,8 +317,8 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
     }
 
     #[test]
-    fn test_reduce_possibility() {
+    fn test_compute_match() {
         let c = parse(COMMANDS);
-        reduce_possibility(&c[0])
+        compute_match(&c[0])
     }
 }
