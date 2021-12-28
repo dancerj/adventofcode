@@ -1,3 +1,4 @@
+use std::collections::BTreeSet;
 use std::collections::HashMap;
 
 const SEGMENTS: [&str; 10] = [
@@ -66,34 +67,58 @@ fn count_sum1478(input: &Vec<SignalPatterns>) -> usize {
         .count()
 }
 
-fn char_to_value(c: char) -> u8 {
-    c as u8 - b'a'
+fn char_to_value(c: u8) -> u8 {
+    c - b'a'
 }
 
-fn reduce_possibility(input: SignalPatterns) {
+fn set_of_alpha(s: &str) -> BTreeSet<u8> {
+    s.as_bytes().iter().map(|&c| char_to_value(c)).collect()
+}
+
+fn reduce_possibility(input: &SignalPatterns) {
     // fake alphabet -> real alphabet possibility map.
     let possibility: Vec<Vec<bool>> = vec![vec![true; 10]; 10];
+
+    let mut by_len = HashMap::new();
+    input.digits.iter().for_each(|digit| {
+        let len = digit.len();
+        let x = by_len.entry(len).or_insert(vec![]);
+        x.push(set_of_alpha(digit));
+    });
+
+    let f: Vec<u8> = by_len
+        .get(&3)
+        .unwrap()
+        .get(0)
+        .unwrap()
+        .difference(by_len.get(&2).unwrap().get(0).unwrap())
+        .cloned()
+        .collect();
+
+    assert_eq!(f.len(), 1);
+    let f = f[0];
+
     input.digits.iter().for_each(|digit| {
         match digit.len() {
             2 => {
-                // the two alphabets mean 1, cf
-            },
+                // the two alphabets can only mean 1, cf
+            }
             3 => {
                 // the 3 mean 7, acf
-            },
+            }
             4 => {
                 // the 4 mean 4, bcdf(-abe)
-            },
+            }
             5 => {
                 // the 5 mean 2,3,5 acdeg(-bf) acdfg(-be) abdfg(-ce)
                 // adg == true, others not sure
-            },
+            }
             6 => {
                 // the 6 mean 0,6,9 abcefg(-d) abdefg(-c) abcdfg(-e)
-            },
+            }
             7 => {
                 // the 7 mean 8, no hint
-            },
+            }
             _ => {}
         }
     })
@@ -142,7 +167,6 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
         assert_eq!(SEGMENTS[4].len(), 4);
         assert_eq!(SEGMENTS[7].len(), 3);
         assert_eq!(SEGMENTS[8].len(), 7);
-        panic!();
     }
 
     #[test]
@@ -159,5 +183,24 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
     fn test_count_nums1478_real() {
         let c = count_sum1478(&parse(include_str!("input.txt")));
         assert_eq!(c, 548);
+    }
+    // A=0,
+    // B=1,
+    // C=2,
+    // D=3,
+    // E=4,
+    // F=5,
+    // G=6,
+
+    #[test]
+    fn test_set_of_alpha() {
+        assert_eq!(set_of_alpha("def"), vec![3, 4, 5].into_iter().collect());
+        assert_eq!(set_of_alpha("fed"), vec![3, 4, 5].into_iter().collect());
+    }
+
+    #[test]
+    fn test_reduce_possibility() {
+        let c = parse(COMMANDS);
+        reduce_possibility(&c[0])
     }
 }
