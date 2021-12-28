@@ -79,7 +79,7 @@ fn to_set(input: &[u8]) -> BTreeSet<u8> {
     input.iter().cloned().collect()
 }
 
-fn compute_match(input: &SignalPatterns) {
+fn compute_match(input: &SignalPatterns) -> Vec<usize> {
     // fake alphabet -> real alphabet possibility map.
     let possibility: Vec<Vec<bool>> = vec![vec![true; 10]; 10];
 
@@ -225,21 +225,39 @@ fn compute_match(input: &SignalPatterns) {
     //         _ => {}
     //     }
     // })
-    println!("{:?}", [a,b,c,d,e,f,g]);
-    let lookup : Vec<BTreeSet<u8>> = vec![
-        to_set(&[a,b,c,e,f,g]),
-        to_set(&[c,f]),
-        to_set(&[a,c,d,e,g]),
-        to_set(&[a,c,d,f,g]),
-        to_set(&[b,c,d,f]),
-        to_set(&[a,b,d,f,g]),
-        to_set(&[a,b,d,e,f,g]),
-        to_set(&[a,c,f]),
-        to_set(&[a,b,c,d,e,f,g]),
-        to_set(&[a,b,c,d,f,g]),
+    println!("{:?}", [a, b, c, d, e, f, g]);
+    let lookup: Vec<BTreeSet<u8>> = vec![
+        to_set(&[a, b, c, e, f, g]),
+        to_set(&[c, f]),
+        to_set(&[a, c, d, e, g]),
+        to_set(&[a, c, d, f, g]),
+        to_set(&[b, c, d, f]),
+        to_set(&[a, b, d, f, g]),
+        to_set(&[a, b, d, e, f, g]),
+        to_set(&[a, c, f]),
+        to_set(&[a, b, c, d, e, f, g]),
+        to_set(&[a, b, c, d, f, g]),
     ];
     println!("{:?}", lookup);
-    //todo
+
+    let result : Vec<usize> = input.output.iter().map(|digit| {
+        let a = set_of_alpha(digit);
+        let found =
+            lookup
+                .iter()
+                .enumerate()
+                .find_map(|(n, candidate)| if candidate == &a { Some(n) } else { None });
+        found.unwrap()
+    }).collect();
+    println!("{:?}", result);
+    result
+}
+
+fn sum_match(input: &Vec<SignalPatterns>) -> usize {
+    input.iter().map(|i| {
+        let r = compute_match(i);
+        r[0]*1000+r[1]*100+r[2]*10+r[3]
+    }).sum()
 }
 
 fn main() {}
@@ -318,7 +336,25 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
 
     #[test]
     fn test_compute_match() {
+        let c = parse("acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf");
+        assert_eq!(compute_match(&c[0]), [5,3,5,3]);
+    }
+
+    #[test]
+    fn test_compute_match_2() {
         let c = parse(COMMANDS);
-        compute_match(&c[0])
+        assert_eq!(compute_match(&c[0]), [8,3,9,4]);
+    }
+
+    #[test]
+    fn test_sum_match() {
+        let c = parse(COMMANDS);
+        assert_eq!(sum_match(&c), 61229);
+    }
+
+    #[test]
+    fn test_sum_match_real() {
+        let c = parse(include_str!("input.txt"));
+        assert_eq!(sum_match(&c), 1074888);
     }
 }
