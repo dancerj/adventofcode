@@ -83,10 +83,35 @@ fn reduce_possibility(input: &SignalPatterns) {
     input.digits.iter().for_each(|digit| {
         let len = digit.len();
         let x = by_len.entry(len).or_insert(vec![]);
-        x.push(set_of_alpha(digit));
+        let a = set_of_alpha(digit);
+        println!(
+            "{}",
+            (0..7)
+                .map(|x| if a.contains(&x) { 'O' } else { '_' })
+                .collect::<String>()
+        );
+        x.push(a);
     });
 
-    let f: Vec<u8> = by_len
+    // OOOOOOO
+    //         0,6,9 d,c,e
+    // Oc_OOOO
+    // O_OOOOO
+    // _cOOOOO
+
+    //         3,7,5 bf/be/ce
+    // _OOOOO_ -- (4) e fixed now, b or (already fixed c. -- b)
+    // __OOOOO -- (3) c fixed now, e
+    // OOOO_O_ -- (5) b fixed now, (e already fixed), f.
+
+    // _OO_O_O 4 -- bcdf (6) only remaining d.
+    // _O_aO__ 7 -- (1) a-- acf
+    // _c__O__ 1 --  cf ((2)c -- need to match with 0,6,9)
+
+    // ecdaf_b -- (7) remaining g
+
+    panic!();
+    let a: Vec<u8> = by_len
         .get(&3)
         .unwrap()
         .get(0)
@@ -95,8 +120,8 @@ fn reduce_possibility(input: &SignalPatterns) {
         .cloned()
         .collect();
 
-    assert_eq!(f.len(), 1);
-    let f = f[0];
+    assert_eq!(a.len(), 1);
+    let a = a[0];
 
     input.digits.iter().for_each(|digit| {
         match digit.len() {
