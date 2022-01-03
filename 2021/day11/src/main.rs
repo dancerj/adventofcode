@@ -31,17 +31,23 @@ impl Context {
         }
     }
 
-    fn adjust(&mut self, x: i32, y: i32) {
-        if x >= 0 && y >= 0 && x < self.xsize as i32 && y < self.ysize as i32 {
-            self.map[y as usize][x as usize] += 1;
-            if self.map[y as usize][x as usize] == 10 {
+    fn adjust(&mut self, x: usize, y: usize) {
+        if x < self.xsize && y < self.ysize {
+            self.map[y][x] += 1;
+            if self.map[y][x] == 10 {
                 // flash
-                self.adjust(x - 1, y - 1);
-                self.adjust(x - 1, y);
-                self.adjust(x - 1, y + 1);
-                self.adjust(x, y - 1);
+                if x.checked_sub(1) != None {
+                    if y.checked_sub(1) != None {
+                        self.adjust(x - 1, y - 1);
+                    }
+                    self.adjust(x - 1, y);
+                    self.adjust(x - 1, y + 1);
+                }
+                if y.checked_sub(1) != None {
+                    self.adjust(x, y - 1);
+                    self.adjust(x + 1, y - 1);
+                }
                 self.adjust(x, y + 1);
-                self.adjust(x + 1, y - 1);
                 self.adjust(x + 1, y);
                 self.adjust(x + 1, y + 1);
             }
@@ -58,7 +64,7 @@ fn count_flashes(s: &str, count: u32) -> u32 {
         // increase first
         for y in 0..c.ysize {
             for x in 0..c.xsize {
-                c.adjust(x as i32, y as i32);
+                c.adjust(x, y);
             }
         }
 
@@ -84,7 +90,7 @@ fn find_simultaneous_flashes(s: &str) -> u32 {
         // increase first
         for y in 0..c.ysize {
             for x in 0..c.xsize {
-                c.adjust(x as i32, y as i32);
+                c.adjust(x, y);
             }
         }
 
