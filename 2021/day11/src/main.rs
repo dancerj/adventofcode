@@ -15,19 +15,22 @@ struct Context {
     map: Vec<Vec<u32>>,
     xsize: usize,
     ysize: usize,
+    total_size: usize,
 }
 
 impl Context {
     fn new(map: Vec<Vec<u32>>) -> Self {
-        let mut ret = Self {
+        let xsize = map[0].len();
+        let ysize = map.len();
+        let total_size = xsize * ysize;
+        Self {
             map,
-            xsize: 0,
-            ysize: 0,
-        };
-        ret.xsize = ret.map[0].len();
-        ret.ysize = ret.map.len();
-        ret
+            xsize,
+            ysize,
+            total_size,
+        }
     }
+
     fn adjust(&mut self, x: i32, y: i32) {
         if x >= 0 && y >= 0 && x < self.xsize as i32 && y < self.ysize as i32 {
             self.map[y as usize][x as usize] += 1;
@@ -72,6 +75,35 @@ fn count_flashes(s: &str, count: u32) -> u32 {
     flashes
 }
 
+fn find_simultaneous_flashes(s: &str) -> u32 {
+    let mut c = Context::new(parse(s));
+
+    let mut count = 0;
+    loop {
+        count += 1;
+        // increase first
+        for y in 0..c.ysize {
+            for x in 0..c.xsize {
+                c.adjust(x as i32, y as i32);
+            }
+        }
+
+        // then count the flashes & reset
+        let mut flashes = 0;
+        for y in 0..c.ysize {
+            for x in 0..c.xsize {
+                if c.map[y][x] > 9 {
+                    c.map[y][x] = 0;
+                    flashes += 1;
+                }
+            }
+        }
+        if flashes == c.total_size {
+            return count;
+        }
+    }
+}
+
 fn main() {}
 
 #[cfg(test)]
@@ -105,5 +137,17 @@ mod tests {
     fn test_iterate_real() {
         let i = count_flashes(include_str!("input.txt"), 100);
         assert_eq!(i, 1713);
+    }
+
+    #[test]
+    fn test_find_simultaneous_flashes() {
+        let i = find_simultaneous_flashes(COMMANDS);
+        assert_eq!(i, 195);
+    }
+
+    #[test]
+    fn test_find_simultaneous_flashes_real() {
+        let i = find_simultaneous_flashes(include_str!("input.txt"));
+        assert_eq!(i, 502);
     }
 }
