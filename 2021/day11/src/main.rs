@@ -37,7 +37,7 @@ impl Context {
                 self.adjust(x - 1, y);
                 self.adjust(x - 1, y + 1);
                 self.adjust(x, y - 1);
-                self.adjust(x, y + 2);
+                self.adjust(x, y + 1);
                 self.adjust(x + 1, y - 1);
                 self.adjust(x + 1, y);
                 self.adjust(x + 1, y + 1);
@@ -46,16 +46,32 @@ impl Context {
     }
 }
 
-fn count_flashes(s: &str) -> u32 {
+fn count_flashes(s: &str, count: u32) -> u32 {
     let mut c = Context::new(parse(s));
 
-    for y in 0..c.ysize {
-        for x in 0..c.xsize {
-            c.adjust(x as i32, y as i32);
+    let mut flashes = 0;
+
+    for _ in 0..count {
+        // increase first
+        for y in 0..c.ysize {
+            for x in 0..c.xsize {
+                c.adjust(x as i32, y as i32);
+            }
+        }
+
+        // then count the flashes & reset
+        for y in 0..c.ysize {
+            for x in 0..c.xsize {
+                if c.map[y][x] > 9 {
+                    c.map[y][x] = 0;
+                    flashes += 1;
+                }
+            }
         }
     }
-    0
+    flashes
 }
+
 fn main() {}
 
 #[cfg(test)]
@@ -81,7 +97,7 @@ mod tests {
 
     #[test]
     fn test_iterate() {
-        let i = count_flashes(COMMANDS);
-        assert_eq!(i, 5);
+        let i = count_flashes(COMMANDS, 100);
+        assert_eq!(i, 1656);
     }
 }
