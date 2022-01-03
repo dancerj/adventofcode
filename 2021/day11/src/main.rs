@@ -100,4 +100,10 @@ mod tests {
         let i = count_flashes(COMMANDS, 100);
         assert_eq!(i, 1656);
     }
+
+    #[test]
+    fn test_iterate_real() {
+        let i = count_flashes(include_str!("input.txt"), 100);
+        assert_eq!(i, 1713);
+    }
 }
