@@ -83,6 +83,30 @@ zg-he
 pj-fs
 start-RW";
 
+    const REAL_COMMANDS: &str = "start-YA
+ps-yq
+zt-mu
+JS-yi
+yq-VJ
+QT-ps
+start-yq
+YA-yi
+start-nf
+nf-YA
+nf-JS
+JS-ez
+yq-JS
+ps-JS
+ps-yi
+yq-nf
+QT-yi
+end-QT
+nf-yi
+zt-QT
+end-ez
+yq-YA
+end-JS";
+
     #[test]
     fn test_parse() {
         let i = parse(COMMANDS);
@@ -98,6 +122,12 @@ start-RW";
     #[test]
     fn test_iterate() {
         let i = routes(COMMANDS);
-        assert_eq!(i, 1656);
+        assert_eq!(i, 226);
+    }
+
+    #[test]
+    fn test_iterate_real() {
+        let i = routes(REAL_COMMANDS);
+        assert_eq!(i, 4304);
     }
 }
