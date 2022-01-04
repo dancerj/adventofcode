@@ -43,7 +43,6 @@ fn routes(s: &str) -> u32 {
                         continue;
                     }
                     if item.chars().nth(0).unwrap().is_ascii_lowercase() && seen.contains(item) {
-                        // println!("skip {:?}", item);
                         continue;
                     }
                     // println!("go {:?}", item);
@@ -56,6 +55,49 @@ fn routes(s: &str) -> u32 {
     }
 
     route("start", vec![], &map)
+}
+
+fn routes2(s: &str) -> u32 {
+    let map = parse_map(s);
+    println!(" {:?}", map);
+
+    fn route(
+        s: &str,
+        prev: Vec<&str>,
+        map: &HashMap<&str, Vec<&str>>,
+        dupcave: Option<&str>,
+    ) -> u32 {
+        let mut result = 0;
+        let mut prev = prev.clone();
+        prev.push(s);
+        let seen = prev.iter().copied().collect::<HashSet<&str>>();
+        match map.get(s) {
+            Some(items) => {
+                for item in items {
+                    let mut dupcave = dupcave.clone();
+                    // println!("{:?}", item);
+                    if item == &"end" {
+                        result += 1;
+                        // println!("complete {:?}", prev);
+                        continue;
+                    }
+                    if item.chars().nth(0).unwrap().is_ascii_lowercase() && seen.contains(item) {
+                        if item != &"start" && dupcave == None {
+                            dupcave = Some(&item);
+                        } else {
+                            continue;
+                        }
+                    }
+                    // println!("go {:?}", item);
+                    result += route(item, prev.clone(), map, dupcave)
+                }
+                result
+            }
+            _ => 0,
+        }
+    }
+
+    route("start", vec![], &map, None)
 }
 
 fn main() {}
@@ -129,5 +171,17 @@ end-JS";
     fn test_iterate_real() {
         let i = routes(REAL_COMMANDS);
         assert_eq!(i, 4304);
+    }
+
+    #[test]
+    fn test_iterate2() {
+        let i = routes2(COMMANDS);
+        assert_eq!(i, 3509);
+    }
+
+    #[test]
+    fn test_iterate2_real() {
+        let i = routes2(REAL_COMMANDS);
+        assert_eq!(i, 118242);
     }
 }
