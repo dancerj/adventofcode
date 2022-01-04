@@ -1,6 +1,3 @@
-//use std::collections::BTreeSet;
-//use std::collections::HashMap;
-
 fn parse(s: &str) -> Vec<Vec<u32>> {
     s.lines()
         .map(|line| {
