@@ -1,12 +1,11 @@
 //use std::collections::HashMap;
 //use std::collections::HashSet;
 
-
-fn parse(s:&str) -> (Vec<&str>, Vec<&str>) {
+fn parse(s: &str) -> (Vec<&str>, Vec<&str>) {
     let mut lines = s.lines();
-    let positions:Vec<&str> = lines.by_ref().take_while(|&line| line != "").collect();
-    let fold_commands:Vec<&str> = lines.by_ref().collect();
-     (positions, fold_commands)
+    let positions: Vec<&str> = lines.by_ref().take_while(|&line| line != "").collect();
+    let fold_commands: Vec<&str> = lines.by_ref().collect();
+    (positions, fold_commands)
 }
 fn main() {}
 
