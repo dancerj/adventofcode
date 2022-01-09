@@ -1,7 +1,7 @@
 //use std::collections::HashMap;
 //use std::collections::HashSet;
 
-fn parse(s: &str) -> (Vec<(u32,u32)>, Vec<&str>) {
+fn parse(s: &str) -> (Vec<(u32, u32)>, Vec<&str>) {
     let mut lines = s.lines();
     let positions: Vec<(u32, u32)> = lines
         .by_ref()
@@ -50,7 +50,7 @@ fold along x=5";
     #[test]
     fn test_parse() {
         let i = parse(COMMANDS);
-        assert_eq!(i.0[0], (6,10));
+        assert_eq!(i.0[0], (6, 10));
         assert_eq!(i.1[0], "fold along y=7");
     }
 }
