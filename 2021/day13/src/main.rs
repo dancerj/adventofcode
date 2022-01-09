@@ -17,8 +17,8 @@ fn parse(s: &str) -> (Vec<(u32, u32)>, Vec<(&str, u32)>) {
             }
         })
         .collect();
-    let size = positions.iter().map(|(x, y)| x.max(y)).max();
-    // let mut matrix = vec![vec![]];
+    let size:usize = *positions.iter().map(|(x, y)| x.max(y)).max().unwrap() as usize;
+    let mut _matrix = vec![vec![0;size]; size];
 
     let fold_commands: Vec<_> = lines
         .map(|line| {
