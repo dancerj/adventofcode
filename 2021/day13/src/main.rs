@@ -1,9 +1,9 @@
 //use std::collections::HashMap;
 //use std::collections::HashSet;
 
-fn parse(s: &str) -> (Vec<(u32, u32)>, Vec<(&str, u32)>) {
+fn parse(s: &str) -> (Vec<(usize, usize)>, Vec<(&str, usize)>) {
     let mut lines = s.lines();
-    let positions: Vec<(u32, u32)> = lines
+    let positions: Vec<(usize, usize)> = lines
         .by_ref()
         .map_while(|line| {
             if line != "" {
@@ -17,8 +17,11 @@ fn parse(s: &str) -> (Vec<(u32, u32)>, Vec<(&str, u32)>) {
             }
         })
         .collect();
-    let size:usize = *positions.iter().map(|(x, y)| x.max(y)).max().unwrap() as usize;
-    let mut _matrix = vec![vec![0;size]; size];
+    let size = positions.iter().map(|(x, y)| x.max(y)).max().unwrap() + 1;
+    let mut matrix = vec![vec![0; size]; size];
+    positions.iter().for_each(|&(x, y)| {
+        matrix[y][x] = 1;
+    });
 
     let fold_commands: Vec<_> = lines
         .map(|line| {
