@@ -61,6 +61,30 @@ fn parse(s: &str) -> (HashSet<(usize, usize)>, Vec<(Fold, usize)>) {
         .collect();
     (positions, fold_commands)
 }
+
+fn fold_once(positions: HashSet<(usize, usize)>, fold: &(Fold, usize)) -> HashSet<(usize, usize)> {
+    let positions = positions
+        .iter()
+        .map(|&(x, y)| match *fold {
+            (Fold::X, value) => {
+                if x > value {
+                    (value - (x - value), y)
+                } else {
+                    (x, y)
+                }
+            }
+            (Fold::Y, value) => {
+                if y > value {
+                    (x, value - (y - value))
+                } else {
+                    (x, y)
+                }
+            }
+        })
+        .collect();
+    positions
+}
+
 fn main() {}
 
 #[cfg(test)]
@@ -88,10 +112,21 @@ mod tests {
 
 fold along y=7
 fold along x=5";
+
     #[test]
     fn test_parse() {
-        let i = parse(COMMANDS);
-        assert!(i.0.contains(&(6, 10)));
-        assert_eq!(i.1[0], (Fold::Y, 7));
+        let (positions, fold) = parse(COMMANDS);
+        assert!(positions.contains(&(6, 10)));
+        assert_eq!(fold[0], (Fold::Y, 7));
+        let positions2 = fold_once(positions, &fold[0]);
+        assert_eq!(positions2.len(), 17);
     }
+
+    #[test]
+    fn test_parse_real() {
+        let (positions, fold) = parse(include_str!("input.txt"));
+        let positions2 = fold_once(positions, &fold[0]);
+        assert_eq!(positions2.len(), 602);
+    }
+
 }
