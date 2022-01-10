@@ -36,19 +36,25 @@ fn apply(s: &str, rules: &HashMap<&str, &str>) -> String {
     result
 }
 
-fn apply10(s: &str, rules: &HashMap<&str, &str>) -> u32 {
-    let mut result = s.to_string();
-    (0..10).for_each(|_| {
-        result = apply(&result, rules);
-    });
+fn get_count(s: &str) -> Vec<(u32, char)> {
     let mut map: HashMap<char, u32> = HashMap::new();
-    result.chars().for_each(|c| {
+    s.chars().for_each(|c| {
         let entry = map.entry(c).or_insert(0);
         *entry += 1;
     });
     let mut by_count: Vec<(u32, char)> = map.iter().map(|(&c, &count)| (count, c)).collect();
     by_count.sort();
-    println!("{:?}", by_count);
+    // println!("{} {:?}", s, by_count);
+    by_count
+}
+
+fn apply_n(n: u32, s: &str, rules: &HashMap<&str, &str>) -> u32 {
+    let mut result = s.to_string();
+    (0..n).for_each(|_| {
+        result = apply(&result, rules);
+        get_count(&result);
+    });
+    let by_count = get_count(&result);
     let most_common_element = by_count[by_count.len() - 1];
     let least_common_element = by_count[0];
     most_common_element.0 - least_common_element.0
@@ -86,15 +92,14 @@ CN -> C";
         assert_eq!(s1, "NCNBCHB");
         let s2 = apply(&s1, &rules);
         assert_eq!(s2, "NBCCNBBBCBHCB");
-        let c = apply10(&s, &rules);
+        let c = apply_n(10, &s, &rules);
         assert_eq!(c, 1588);
     }
-
 
     #[test]
     fn test_parse_real() {
         let (s, rules) = parse(include_str!("input.txt"));
-        let c = apply10(&s, &rules);
+        let c = apply_n(10, &s, &rules);
         assert_eq!(c, 3284);
     }
 }
