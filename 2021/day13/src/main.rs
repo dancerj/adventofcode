@@ -1,9 +1,15 @@
 //use std::collections::HashMap;
-//use std::collections::HashSet;
+use std::collections::HashSet;
 
-fn parse(s: &str) -> (Vec<(usize, usize)>, Vec<(&str, usize)>) {
+#[derive(PartialEq, Debug)]
+enum Fold {
+    X,
+    Y,
+}
+
+fn parse(s: &str) -> (HashSet<(usize, usize)>, Vec<(Fold, usize)>) {
     let mut lines = s.lines();
-    let positions: Vec<(usize, usize)> = lines
+    let positions: HashSet<(usize, usize)> = lines
         .by_ref()
         .map_while(|line| {
             if line != "" {
@@ -36,11 +42,11 @@ fn parse(s: &str) -> (Vec<(usize, usize)>, Vec<(&str, usize)>) {
                     match (words.next().unwrap(), words.next().unwrap()) {
                         ("x", value) => {
                             let value = value.parse().unwrap();
-                            ("x", value)
+                            (Fold::X, value)
                         }
                         ("y", value) => {
                             let value = value.parse().unwrap();
-                            ("y", value)
+                            (Fold::Y, value)
                         }
                         _ => {
                             panic!();
@@ -85,7 +91,7 @@ fold along x=5";
     #[test]
     fn test_parse() {
         let i = parse(COMMANDS);
-        assert_eq!(i.0[0], (6, 10));
-        assert_eq!(i.1[0], ("y", 7));
+        assert!(i.0.contains(&(6, 10)));
+        assert_eq!(i.1[0], (Fold::Y, 7));
     }
 }
