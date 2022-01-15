@@ -52,13 +52,86 @@ fn apply_n(n: u32, s: &str, rules: &HashMap<&str, &str>) -> u32 {
     let mut result = s.to_string();
     (0..n).for_each(|_| {
         result = apply(&result, rules);
-        get_count(&result);
     });
     let by_count = get_count(&result);
     let most_common_element = by_count[by_count.len() - 1];
     let least_common_element = by_count[0];
     most_common_element.0 - least_common_element.0
 }
+
+// We just need the bigram and not the actual order, so bigram->count map is good enough.
+struct Bigrams {
+    // Needs String because we construct it later on.
+    count: HashMap<String, u32>,
+    start: char,
+    end: char,
+}
+
+fn convert_to_bigram(s: &str) -> Bigrams {
+    let mut result = Bigrams {
+        count: HashMap::new(),
+        start: s.chars().nth(0).unwrap(),
+        end: s.chars().nth(s.len() - 1).unwrap(),
+    };
+    for i in 0..s.len() - 1 {
+        *result.count.entry(s[i..=i + 1].to_string()).or_insert(0) += 1
+    }
+
+    // dbg!(&result.count);
+    result
+}
+
+fn apply_bigram(b: &Bigrams, rules: &HashMap<&str, &str>) -> Bigrams {
+    let mut result = Bigrams {
+        count: HashMap::new(),
+        start: b.start,
+        end: b.end,
+    };
+
+    for (bigram, count) in b.count.iter() {
+        if let Some(&got) = rules.get(&bigram as &str) {
+            *result
+                .count
+                .entry(bigram[0..=0].to_owned() + got)
+                .or_insert(0) += count;
+            *result
+                .count
+                .entry(got.to_owned() + &bigram[1..=1])
+                .or_insert(0) += count;
+        } else {
+            *result.count.entry(bigram.to_string()).or_insert(0) += count;
+        }
+    }
+    result
+}
+
+fn count_bigram(b: &Bigrams) -> Vec<(u32, char)> {
+    let mut map: HashMap<char, u32> = HashMap::new();
+    for (bigram, count) in b.count.iter() {
+        *map.entry(bigram.chars().nth(0).unwrap()).or_insert(0) += count;
+        *map.entry(bigram.chars().nth(1).unwrap()).or_insert(0) += count;
+    }
+    *map.entry(b.start).or_insert(0) += 1;
+    *map.entry(b.end).or_insert(0) += 1;
+
+    // half the count here.
+    let mut by_count: Vec<(u32, char)> = map.iter().map(|(&c, &count)| (count / 2, c)).collect();
+    by_count.sort();
+    // println!("{} {:?}", b, by_count);
+    by_count
+}
+
+fn apply_n_bigram(n: u32, s: &str, rules: &HashMap<&str, &str>) -> u32 {
+    let mut result = convert_to_bigram(&s);
+    (0..n).for_each(|_| {
+        result = apply_bigram(&result, rules);
+    });
+    let by_count = count_bigram(&result);
+    let most_common_element = by_count[by_count.len() - 1];
+    let least_common_element = by_count[0];
+    most_common_element.0 - least_common_element.0
+}
+
 
 fn main() {}
 
@@ -99,7 +172,18 @@ CN -> C";
     #[test]
     fn test_parse_real() {
         let (s, rules) = parse(include_str!("input.txt"));
-        let c = apply_n(10, &s, &rules);
+        let c = apply_n_bigram(10, &s, &rules);
         assert_eq!(c, 3284);
+    }
+
+    #[test]
+    fn test_bigram() {
+        let (s, rules) = parse(COMMANDS);
+        let b = convert_to_bigram(&s);
+        let b = apply_bigram(&b, &rules);
+        count_bigram(&b);
+
+        // let c = apply_n_bigram(40, &s, &rules);
+        // assert_eq!(c, 1588);
     }
 }
