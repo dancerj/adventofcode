@@ -22,49 +22,44 @@ impl MapInfo {
         }
     }
 
-    fn cost(&self, at: &(usize, usize)) -> u32 {
-        self.map[at.1][at.0]
-    }
+    fn shortest_path(&mut self) -> u32 {
+        // Starting position is 0.
+        self.tentative_cost[0][0] = 0;
+        for x in 0..self.width {
+            for y in 0..self.height {
+                let cost_at_position = self.map[y][x];
 
-    fn shortest_path(
-        &mut self,
-        position: (Option<usize>, Option<usize>),
-        cost: u32,
-    ) -> Option<u32> {
-        if position.0 == None
-            || position.1 == None
-            || position.0.unwrap() >= self.width
-            || position.1.unwrap() >= self.height
-        {
-            return None;
+                let cost = vec![
+                    (x.checked_sub(1), Some(y)),
+                    (Some(x), y.checked_sub(1)),
+                    (Some(x + 1), Some(y)),
+                    (Some(x), Some(y + 1)),
+                ]
+                .iter()
+                .filter_map(|&(newx, newy)| {
+                    if let Some(newx) = newx {
+                        if let Some(newy) = newy {
+                            if newx < self.width && newy < self.height {
+                                return self.tentative_cost[newy][newx]
+                                    .checked_add(cost_at_position);
+                            }
+                        }
+                    }
+                    None
+                })
+                .min();
+                if let Some(cost) = cost {
+                    self.tentative_cost[y][x] = cost;
+                    if x == self.width - 1 && y == self.height - 1 {
+                        // Goal!
+                        return cost;
+                    }
+                }
+            }
         }
-        let position = (position.0.unwrap(), position.1.unwrap());
-
-        let cost = cost + self.cost(&position);
-
-        if cost < self.tentative_cost[position.1][position.0] {
-            self.tentative_cost[position.1][position.0] = cost;
-        } else {
-            // There was already someone who visited this node with lower cost.
-            return None;
-        }
-
-        if position == (self.width - 1, self.height - 1) {
-            // Goal!
-            return Some(cost);
-        }
-
-        // Iterate all others and find minimal route.
-        let cost = vec![
-            self.shortest_path((position.0.checked_sub(1), Some(position.1)), cost),
-            self.shortest_path((Some(position.0), position.1.checked_sub(1)), cost),
-            self.shortest_path((Some(position.0 + 1), Some(position.1)), cost),
-            self.shortest_path((Some(position.0), Some(position.1 + 1)), cost),
-        ]
-        .iter()
-        .filter_map(|&x| x)
-        .min();
-        cost
+        panic!();
+        //        println!("{:?}", self.tentative_cost);
+        //None
     }
 }
 
@@ -89,7 +84,7 @@ mod tests {
     fn test_parse() {
         let mut t = MapInfo::new(COMMANDS);
         assert_eq!(t.map[0][0], 1);
-        let cost = t.shortest_path((Some(0), Some(0)), 0).unwrap() - 1;
+        let cost = t.shortest_path();
         assert_eq!(cost, 40);
     }
 
@@ -99,7 +94,7 @@ mod tests {
         assert_eq!(t.width, 100);
         assert_eq!(t.height, 100);
         assert_eq!(t.map[0][0], 3);
-        // let cost = t.shortest_path((Some(0), Some(0)), 0).unwrap() - 1;
-        // assert_eq!(cost, 40);
+        let cost = t.shortest_path();
+        assert_eq!(cost, 447);
     }
 }
