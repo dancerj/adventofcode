@@ -13,11 +13,11 @@ impl BitReader {
         }
     }
 
-    fn read(&mut self, n: usize) -> u32 {
+    fn read(&mut self, n: usize) -> u64 {
         let result = (0..n)
             .map(|shift| {
                 if self.data.chars().nth(self.offset + shift) == Some('1') {
-                    1u32 << (n - shift - 1)
+                    1u64 << (n - shift - 1)
                 } else {
                     0
                 }
@@ -27,7 +27,7 @@ impl BitReader {
         result
     }
 
-    fn read_literal(&mut self) -> u32 {
+    fn read_literal(&mut self) -> u64 {
         // prerequisite is that previous reads were 6, 4 (literal
         // value).
         let mut result = 0;
@@ -43,10 +43,10 @@ impl BitReader {
         result
     }
 
-    fn add_version_numbers_internal(&mut self) -> u32 {
+    fn add_version_numbers_internal(&mut self) -> u64 {
         let mut version = self.read(3);
         let t = self.read(3);
-        if t == PacketType::Literal as u32 {
+        if t == PacketType::Literal as u64 {
             println!("literal {}", version);
             self.read_literal();
         } else {
@@ -76,11 +76,11 @@ impl BitReader {
         version
     }
 
-    fn parse_operators(&mut self) -> u32 {
-        let mut values: Vec<u32> = vec![];
+    fn parse_operators(&mut self) -> u64 {
+        let mut values: Vec<u64> = vec![];
         let _version = self.read(3);
         let t = self.read(3);
-        if t == PacketType::Literal as u32 {
+        if t == PacketType::Literal as u64 {
             values.push(self.read_literal());
             println!("literal {:?}", values);
         } else {
@@ -112,11 +112,11 @@ impl BitReader {
         let t: PacketType = unsafe { std::mem::transmute(t as i8) };
 
         match t {
-            PacketType::Sum => values.iter().sum::<u32>(),
+            PacketType::Sum => values.iter().sum::<u64>(),
             PacketType::Product => {
                 println!("product {:?}", values);
-                values.iter().product::<u32>()
-            },
+                values.iter().product::<u64>()
+            }
             PacketType::Minimum => *values.iter().min().unwrap(),
             PacketType::Maximum => *values.iter().max().unwrap(),
             PacketType::Literal => {
@@ -203,13 +203,13 @@ mod tests {
         let mut t = parse(COMMANDS);
         // D2FE28
         assert_eq!(t.read(3), 6);
-        assert_eq!(t.read(3), PacketType::Literal as u32);
+        assert_eq!(t.read(3), PacketType::Literal as u64);
         assert_eq!(t.read_literal(), 2021);
         t.sync_to_alignment();
 
         // 38006F45291200
         assert_eq!(t.read(3), 1);
-        assert_eq!(t.read(3), PacketType::LessThan as u32);
+        assert_eq!(t.read(3), PacketType::LessThan as u64);
         assert_eq!(t.read(1), 0); // length type ID.
         assert_eq!(t.read(15), 27); // length.
         t.read(27); // Skip.
@@ -217,7 +217,7 @@ mod tests {
 
         // EE00D40C823060
         assert_eq!(t.read(3), 7);
-        assert_eq!(t.read(3), PacketType::Maximum as u32);
+        assert_eq!(t.read(3), PacketType::Maximum as u64);
         assert_eq!(t.read(1), 1); // length type ID.
         assert_eq!(t.read(11), 3); // number of sub-packets
     }
@@ -262,5 +262,13 @@ mod tests {
         assert_eq!(parse("F600BC2D8F").parse_operators(), 0);
         assert_eq!(parse("9C005AC2F8F0").parse_operators(), 0);
         assert_eq!(parse("9C0141080250320F1802104A08").parse_operators(), 1);
+    }
+
+    #[test]
+    fn test_parse_operators_real() {
+        assert_eq!(
+            parse(include_str!("input.txt")).parse_operators(),
+            13476220616073
+        );
     }
 }
