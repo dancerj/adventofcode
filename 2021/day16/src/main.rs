@@ -86,6 +86,7 @@ impl BitReader {
 
 fn parse(s: &str) -> BitReader {
     let b: String = s
+        .trim()
         .chars()
         .map(|hex| {
             let num = hex.to_digit(16).unwrap();
@@ -161,6 +162,14 @@ mod tests {
         assert_eq!(
             parse("A0016C880162017C3686B18A3D4780").add_version_numbers_internal(),
             31
+        );
+    }
+
+    #[test]
+    fn test_add_version_numbers_internal_real() {
+        assert_eq!(
+            parse(include_str!("input.txt")).add_version_numbers_internal(),
+            940
         );
     }
 }
