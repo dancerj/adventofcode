@@ -1,0 +1,45 @@
+fn main() {
+    println!("Hello, world!");
+}
+
+fn parse(s: &str) -> Vec<u32> {
+    // Return total calories per elf.
+    let mut a = vec![0];
+    let mut n = 0;
+    s.lines().for_each(|line| {
+        if line == "" {
+            n = n + 1;
+            a.push(0);
+        } else {
+            a[n] = a[n] + line.parse::<u32>().unwrap();
+        }
+    });
+    a
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const ELVES: &str = "1000
+2000
+3000
+
+4000
+
+5000
+6000
+
+7000
+8000
+9000
+
+10000";
+
+    #[test]
+    fn test_parse_str() {
+        let simple = parse(ELVES);
+        assert_eq!(simple[0], 5000);
+        assert_eq!(simple.size(), 5);
+    }
+}
