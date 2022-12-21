@@ -80,9 +80,6 @@ fn to_set(input: &[u8]) -> BTreeSet<u8> {
 }
 
 fn compute_match(input: &SignalPatterns) -> Vec<usize> {
-    // fake alphabet -> real alphabet possibility map.
-    let possibility: Vec<Vec<bool>> = vec![vec![true; 10]; 10];
-
     let mut by_len = HashMap::new();
     input.digits.iter().for_each(|digit| {
         let len = digit.len();
