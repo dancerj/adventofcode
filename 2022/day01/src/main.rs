@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+
 fn main() {
     println!("Hello, world!");
 }
@@ -51,4 +53,12 @@ mod tests {
         assert_eq!(70296, m);
     }
 
+    #[test]
+    fn test_parse_str_part2() {
+        let elves = parse(include_str!("input.txt"));
+        let mut m = elves.into_iter().collect::<BTreeSet<u32>>();
+        let top_three = m.pop_last().unwrap() + m.pop_last().unwrap() + m.pop_last().unwrap();
+        assert_eq!(top_three, 205381);
+    }
 }
+
