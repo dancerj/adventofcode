@@ -61,4 +61,3 @@ mod tests {
         assert_eq!(top_three, 205381);
     }
 }
-
