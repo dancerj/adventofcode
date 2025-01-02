@@ -7,15 +7,15 @@ fn parse_input_string(input: &str) -> i32 {
         .lines()
         .map(|line| {
             let mut words = line.split_ascii_whitespace();
-            if let (Some(first), Some(second)) = (words.next(), words.next()) {
-                if let (Ok(first), Ok(second)) = (first.parse::<i32>(), second.parse::<i32>()) {
-                    (first, second)
-                } else {
-                    panic!("// had non-number string?");
-                }
-            } else {
-                panic!("// had empty lines?");
-            }
+            let (first, second) = (
+                words.next().expect("need two strings, empty line"),
+                words.next().expect("needs two strings but had only one"),
+            );
+            let (first, second) = (
+                first.parse::<i32>().expect("Need a number"),
+                second.parse::<i32>().expect("Need a number"),
+            );
+            (first, second)
         })
         .unzip();
     v1.sort_unstable();
