@@ -1,6 +1,3 @@
-fn main() {
-    println!("Hello, world!");
-}
 
 fn parse_input_string(input: &str) -> i32 {
     let (mut v1, mut v2): (Vec<i32>, Vec<i32>) = input
