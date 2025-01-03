@@ -1,4 +1,3 @@
-
 fn parse_input_string(input: &str) -> i32 {
     let (mut v1, mut v2): (Vec<i32>, Vec<i32>) = input
         .lines()
@@ -32,15 +31,16 @@ fn parse_input_string(input: &str) -> i32 {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_small_sample() {
-        let input = "3   4
+    const SAMPLE_INPUT: &str = "3   4
 4   3
 2   5
 1   3
 3   9
 3   3";
+
+    #[test]
+    fn test_small_sample() {
+        let input = SAMPLE_INPUT;
         let result = parse_input_string(input);
         assert_eq!(result, 11);
     }
