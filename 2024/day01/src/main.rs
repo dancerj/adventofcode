@@ -43,9 +43,7 @@ fn parse_similarity_score(input: &str) -> i32 {
         counter.entry(x).and_modify(|curr| *curr += 1).or_insert(1);
     });
 
-    v1.iter().map(|x| {
-        counter.get(x).unwrap_or(&0) * x
-    }).sum()
+    v1.iter().map(|x| counter.get(x).unwrap_or(&0) * x).sum()
 }
 
 #[cfg(test)]
