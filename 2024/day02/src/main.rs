@@ -6,36 +6,39 @@ enum Relative {
 }
 
 fn part1(input: &str) -> usize {
-    input.lines().filter(|line| {
-        let line = line
-            .split_ascii_whitespace()
-            .map(|x| x.parse::<i32>().expect("Need a number"))
-            .collect::<Vec<i32>>()
-            .windows(2)
-            .map(|arr| {
-                let x = arr.get(0).expect("Need a first number");
-                let y = arr
-                    .get(1)
-                    .expect("Need two numbers. windows should give me two numbers, why?");
-                let relative = match x - y {
-                    1..=3 => Relative::Positive,
-                    -3..=-1 => Relative::Negative,
-                    _ => Relative::Invalid,
-                };
-                relative
-            })
-            .collect::<Vec<_>>();
-        if line.len() < 2 {
-            panic!("I didn't think about what to do when there's less than 2 docs");
-        }
-        if !line.windows(2).all(|window| window[0] == window[1]) {
-            return false;
-        }
-        if line[0] == Relative::Invalid {
-            return false;
-        }
-        true
-    }).count()
+    input
+        .lines()
+        .filter(|line| {
+            let line = line
+                .split_ascii_whitespace()
+                .map(|x| x.parse::<i32>().expect("Need a number"))
+                .collect::<Vec<i32>>()
+                .windows(2)
+                .map(|arr| {
+                    let x = arr.get(0).expect("Need a first number");
+                    let y = arr
+                        .get(1)
+                        .expect("Need two numbers. windows should give me two numbers, why?");
+                    let relative = match x - y {
+                        1..=3 => Relative::Positive,
+                        -3..=-1 => Relative::Negative,
+                        _ => Relative::Invalid,
+                    };
+                    relative
+                })
+                .collect::<Vec<_>>();
+            if line.len() < 2 {
+                panic!("I didn't think about what to do when there's less than 2 docs");
+            }
+            if !line.windows(2).all(|window| window[0] == window[1]) {
+                return false;
+            }
+            if line[0] == Relative::Invalid {
+                return false;
+            }
+            true
+        })
+        .count()
 }
 
 #[cfg(test)]
