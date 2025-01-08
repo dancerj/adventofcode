@@ -55,4 +55,11 @@ mod tests {
         let result = part1(input);
         assert_eq!(result, 2);
     }
+
+    #[test]
+    fn test_part1_real_problem() {
+        let input = include_str!("input.txt");
+        let result = part1(input);
+        assert_eq!(result, 472);
+    }
 }
