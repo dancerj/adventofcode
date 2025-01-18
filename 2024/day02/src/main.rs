@@ -1,24 +1,24 @@
-use std::collections::BTreeMap;
-
-#[derive(PartialEq, PartialOrd, Ord, Eq)]
+#[derive(PartialEq, PartialOrd, Ord, Eq, Debug)]
 enum Relative {
     Positive,
     Negative,
     Invalid,
 }
-
-fn parse_line(line: &str) -> Vec<Relative> {
-    let line = line
-        .split_ascii_whitespace()
+fn parse_ascii(line: &str) -> Vec<i32> {
+    line.split_ascii_whitespace()
         .map(|x| x.parse::<i32>().expect("Need a number"))
-        .collect::<Vec<i32>>()
+        .collect()
+}
+
+fn parse_sequence(line: &Vec<i32>) -> Vec<Relative> {
+    let line = line
         .windows(2)
         .map(|arr| {
             let x = arr.get(0).expect("Need a first number");
             let y = arr
                 .get(1)
                 .expect("Need two numbers. windows should give me two numbers, why?");
-            let relative = match x - y {
+            let relative = match y - x {
                 1..=3 => Relative::Positive,
                 -3..=-1 => Relative::Negative,
                 _ => Relative::Invalid,
@@ -32,19 +32,20 @@ fn parse_line(line: &str) -> Vec<Relative> {
     line
 }
 
+fn is_valid(line: &Vec<Relative>) -> bool {
+    if !line.windows(2).all(|window| window[0] == window[1]) {
+        return false;
+    }
+    if line[0] == Relative::Invalid {
+        return false;
+    }
+    true
+}
+
 fn part1(input: &str) -> usize {
     input
         .lines()
-        .filter(|line| {
-            let line = parse_line(line);
-            if !line.windows(2).all(|window| window[0] == window[1]) {
-                return false;
-            }
-            if line[0] == Relative::Invalid {
-                return false;
-            }
-            true
-        })
+        .filter(|line| is_valid(&parse_sequence(&parse_ascii(line))))
         .count()
 }
 
@@ -52,16 +53,24 @@ fn part2(input: &str) -> usize {
     input
         .lines()
         .filter(|line| {
-            let line = parse_line(line);
-            let mut counter = BTreeMap::new();
-            line.iter().for_each(|x| {
-                counter.entry(x).and_modify(|curr| *curr += 1).or_insert(1);
-            });
+            let seq = parse_ascii(line);
+            let line = parse_sequence(&seq);
+            if is_valid(&line) {
+                return true;
+            }
 
-            let size = line.len();
-            // TODO: I don't need to insert the value?
-            *counter.get(&Relative::Positive).unwrap_or(&0) >= size - 1
-                || *counter.get(&Relative::Negative).unwrap_or(&0) >= size - 1
+            for r in 0..seq.len() {
+                let partial: Vec<i32> = seq
+                    .iter()
+                    .enumerate()
+                    .filter(|(pos, _)| *pos != r)
+                    .map(|(_, value)| *value)
+                    .collect();
+                if is_valid(&parse_sequence(&partial)) {
+                    return true;
+                }
+            }
+            false
         })
         .count()
 }
@@ -97,7 +106,7 @@ mod tests {
         let result = part2(input);
 
         // All of them, no that's not right.
-        assert_eq!(result, 6);
+        assert_eq!(result, 4);
     }
 
     #[test]
@@ -105,6 +114,6 @@ mod tests {
         let input = include_str!("input.txt");
         let result = part2(input);
         // The system says this is too high.
-        assert_eq!(result, 525);
+        assert_eq!(result, 520);
     }
 }
