@@ -1,0 +1,25 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main # Trigger on pushes to the main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Use a Debian-based runner
+    container: debian:trixie-slim
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4 # Action to check out your repository code
+
+    - name: Update apt cache and install rustc
+      run: |
+        apt-get update # Update package lists
+        apt-get install -y rustc cargo make
+
+    - name: make
+      run: |
+        make -j 4
+
