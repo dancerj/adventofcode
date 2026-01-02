@@ -3,7 +3,7 @@ name: Build
 on:
   push:
     branches:
-      - main # Trigger on pushes to the main branch
+      - master
 
 jobs:
   build:
