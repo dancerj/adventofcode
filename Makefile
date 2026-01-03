@@ -5,8 +5,8 @@ all: ${TEST_TARGETS}
 clean:
 	-rm -f ${TEST_TARGETS}
 
-%-stamp: %
-	cd $^ && cargo test
+%-stamp: % %/src/main.rs
+	cd $< && cargo test
 	touch $@
 
 .PHONY: clean
