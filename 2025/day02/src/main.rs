@@ -36,6 +36,51 @@ fn part1(input: &str) -> u64 {
     total
 }
 
+fn is_fake2(input: &str) -> bool {
+    let len = input.len();
+    (2..=len).any(|divisor| {
+        // skip if not divisible
+        if len % divisor != 0 {
+            return false;
+        }
+        let sub_length = len / divisor;
+        let part = &input[0..sub_length];
+        let repeated = part.to_owned().repeat(divisor);
+        input == repeated
+    })
+}
+
+fn part2(input: &str) -> u64 {
+    let total = input
+        .trim_end()
+        .split(',')
+        .map(|range| {
+            let mut count = 0;
+            dbg!(range);
+            let mut range = range.split('-');
+            let start: u64 = range
+                .next()
+                .expect("start exected")
+                .parse()
+                .expect("number");
+            let end: u64 = range
+                .next()
+                .expect("end expected after -")
+                .parse()
+                .expect("number");
+            assert_eq!(range.next(), None);
+            for i in start..=end {
+                // evaluate
+                if is_fake2(&i.to_string()) {
+                    count += i;
+                }
+            }
+            count
+        })
+        .sum();
+    total
+}
+
 fn main() {
     println!("Hello, world!");
 }
@@ -57,5 +102,20 @@ mod tests {
         let input = include_str!("input.txt");
         let result = part1(input);
         assert_eq!(result, 31000881061);
+    }
+
+    #[test]
+    fn test_part2_small_sample() {
+        let input = SAMPLE_INPUT;
+        let result = part2(input);
+        assert_eq!(result, 4174379265);
+    }
+
+
+    #[test]
+    fn test_part2_real_problem() {
+        let input = include_str!("input.txt");
+        let result = part2(input);
+        assert_eq!(result, 46769308485);
     }
 }
