@@ -4,15 +4,13 @@ My implementation of advent of code stuff.
 
 ## Running
 
-I'm lazy, you need to be in the right directory.
-
 ```shell
-$ cd 2021/day01/src/
-$ cargo test
-$ cargo run
+$ make
 ```
 
-## Building
+## Building with podman
+
+If container environment is your thing
 
 ```shell
 podman build . -t rustadvent
